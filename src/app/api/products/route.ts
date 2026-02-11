@@ -1,40 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { productService } from "@/services/productService";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const name = searchParams.get("name");
-  const sku = searchParams.get("sku");
-  const ownerId = searchParams.get("ownerId");
-  const status = searchParams.get("status");
-
-  const products = await prisma.product.findMany({
-    where: {
-      name: name ? { contains: name } : undefined,
-      sku: sku || undefined,
-      ownerId: ownerId ? Number(ownerId) : undefined,
-      status: status || undefined,
-    },
-    include: { owner: true },
-  });
-
-  return NextResponse.json(products);
+// GET /api/products → list all products
+export async function GET() {
+  try {
+    const products = await productService.getAllProducts();
+    return NextResponse.json(products);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
+// POST /api/products → create a new product
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { name, sku, price, inventory, status, imageUrl, ownerId } = body;
-
-  if (price < 0 || inventory < 0) {
-    return NextResponse.json(
-      { error: "Price and inventory must be non-negative" },
-      { status: 400 }
-    );
+  try {
+    const body = await req.json();
+    const product = await productService.createProduct(body);
+    return NextResponse.json(product, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
-
-  const product = await prisma.product.create({
-    data: { name, sku, price, inventory, status, imageUrl, ownerId },
-  });
-
-  return NextResponse.json(product, { status: 201 });
 }
