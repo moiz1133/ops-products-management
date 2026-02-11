@@ -4,26 +4,32 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model ProductOwner {
   id        Int       @id @default(autoincrement())
   name      String
-  email     String?
+  email     String    @unique
   products  Product[]
   createdAt DateTime  @default(now())
 }
 
 model Product {
-  id         Int       @id @default(autoincrement())
-  name       String
-  sku        String    @unique
-  price      Float
-  inventory  Int
-  status     String
-  imageUrl   String?
-  ownerId    Int
-  owner      ProductOwner @relation(fields: [ownerId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          Int          @id @default(autoincrement())
+  name        String
+  sku         String       @unique
+  description String?
+  price       Decimal      @db.Decimal(10, 2)
+  inventory   Int
+  status      String
+  imageUrl    String?
+  ownerId     Int
+  owner       ProductOwner @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([name])
+  @@index([sku])
+  @@index([status])
 }
