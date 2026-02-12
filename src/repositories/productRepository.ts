@@ -12,7 +12,15 @@ export const productRepository = {
   async update(id: number, data: any) {
     return prisma.product.update({
       where: { id },
-      data,
+      data: {
+      name: data.name,
+      sku: data.sku,
+      price: Number(data.price),       // convert to number
+      inventory: Number(data.inventory), // convert to number
+      status: data.status,
+      ownerId: Number(data.ownerId),   // convert to number
+      imageUrl: data.imageUrl || null
+    }
     });
   },
 
@@ -26,7 +34,17 @@ export const productRepository = {
   },
 
   async create(data: any) {
-    return prisma.product.create({ data });
-  },
+  return prisma.product.create({
+    data: {
+      name: data.name,
+      sku: data.sku,
+      price: Number(data.price),       // convert to number
+      inventory: Number(data.inventory), // convert to number
+      status: data.status,
+      ownerId: Number(data.ownerId),   // convert to number
+      imageUrl: data.imageUrl || null
+    }
+  });
+}
 
 };
